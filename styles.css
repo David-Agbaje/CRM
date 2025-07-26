@@ -1,9 +1,13 @@
 :root {
-  --primary: #4b7bec;
-  --secondary: #f1f2f6;
-  --dark: #2f3542;
-  --light: #ffffff;
-  --border: #ced6e0;
+  --bg: #1e1e2f;
+  --bg-secondary: #2a2a40;
+  --card-bg: #2f2f48;
+  --accent: #4c8bf5;
+  --text-light: #f1f1f1;
+  --text-muted: #ccc;
+  --border: #3e3e5e;
+  --danger: #e74c3c;
+  --warning: #f39c12;
 }
 
 * {
@@ -13,71 +17,86 @@
 }
 
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: var(--secondary);
-  color: var(--dark);
-  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text-light);
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.6;
   padding: 20px;
 }
 
 .app {
-  max-width: 900px;
+  max-width: 960px;
   margin: auto;
-  background: var(--light);
-  border-radius: 12px;
+  background: var(--bg-secondary);
   padding: 30px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
   animation: fadeIn 0.5s ease-in;
 }
 
 header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 header h1 {
-  font-size: 2rem;
-  color: var(--primary);
+  color: var(--accent);
+  font-size: 2.2rem;
 }
 
 header p {
-  color: #57606f;
+  color: var(--text-muted);
+  margin-top: 5px;
 }
 
 main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-section h2 {
-  margin-bottom: 10px;
-  color: var(--dark);
+section {
+  flex: 1 1 400px;
+}
+
+h2 {
+  margin-bottom: 15px;
+  color: var(--text-light);
 }
 
 form input,
 form textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 12px;
   border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-light);
   border-radius: 6px;
   font-size: 1rem;
 }
 
+form textarea {
+  resize: vertical;
+  height: 80px;
+}
+
 form button {
-  padding: 10px;
-  background: var(--primary);
-  color: white;
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
   transition: background 0.3s ease;
 }
 
 form button:hover {
-  background: #3867d6;
+  background: #3b73cc;
 }
 
 #customer-list {
@@ -86,60 +105,72 @@ form button:hover {
 }
 
 .customer {
-  background: var(--secondary);
+  background: var(--card-bg);
+  padding: 15px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   transition: transform 0.2s ease;
 }
 
 .customer:hover {
-  transform: scale(1.02);
+  transform: translateY(-3px);
 }
 
 .customer strong {
   font-size: 1.1rem;
   display: block;
+  color: var(--accent);
   margin-bottom: 5px;
 }
 
+.customer .meta {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.customer .buttons {
+  margin-top: 10px;
+}
+
 .customer button {
-  background: #ff4757;
-  border: none;
   padding: 6px 10px;
-  margin-top: 8px;
-  margin-right: 5px;
+  margin-right: 10px;
+  border: none;
   border-radius: 4px;
-  color: white;
-  cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.3s ease;
+  cursor: pointer;
+  color: white;
 }
 
-.customer button:hover {
-  background: #e84118;
+.customer .edit-btn {
+  background: var(--warning);
 }
 
-.customer button:nth-child(5) {
-  background: #ffa502;
+.customer .edit-btn:hover {
+  background: #e67e22;
 }
 
-.customer button:nth-child(5):hover {
-  background: #e0a800;
+.customer .delete-btn {
+  background: var(--danger);
+}
+
+.customer .delete-btn:hover {
+  background: #c0392b;
 }
 
 footer {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 40px;
+  color: var(--text-muted);
   font-size: 0.85rem;
-  color: #888;
 }
 
-/* Responsive Layout */
+/* Mobile */
 @media (max-width: 768px) {
   main {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 }
 

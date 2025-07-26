@@ -13,11 +13,13 @@ function renderCustomers() {
     li.className = "customer";
     li.innerHTML = `
       <strong>${customer.name}</strong>
-      📧 ${customer.email}<br>
-      📞 ${customer.phone}<br>
-      📝 ${customer.notes || 'No notes'}<br>
-      <button onclick="editCustomer(${index})">✏️ Edit</button>
-      <button onclick="deleteCustomer(${index})">🗑️ Delete</button>
+      <div class="meta">📧 ${customer.email}</div>
+      <div class="meta">📞 ${customer.phone}</div>
+      <div class="meta">📝 ${customer.notes || "No notes"}</div>
+      <div class="buttons">
+        <button class="edit-btn" onclick="editCustomer(${index})">Edit</button>
+        <button class="delete-btn" onclick="deleteCustomer(${index})">Delete</button>
+      </div>
     `;
     list.appendChild(li);
   });
@@ -30,7 +32,7 @@ function addCustomer(customer) {
 }
 
 function deleteCustomer(index) {
-  if (confirm("Delete this customer?")) {
+  if (confirm("Are you sure you want to delete this customer?")) {
     customers.splice(index, 1);
     saveCustomers();
     renderCustomers();
