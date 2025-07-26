@@ -31,16 +31,21 @@ const qs = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 
 function render() {
-  // Clear existing cards first
-  qa('.cards').forEach(zone => zone.innerHTML = '');
-  
-  const txt = qs('#search')?.value?.toLowerCase() || '';
-  const sel = qs('#filterStage')?.value || '';
-  
+  const pipeline = qs('#pipeline');
+  pipeline.innerHTML = '';
+  crm.STAGES.forEach(stage => {
+    const col = document.createElement('div');
+    col.className = 'column';
+    col.innerHTML = `<h3>${stage}</h3><div class="cards" data-stage="${stage}"></div>`;
+    pipeline.appendChild(col);
+  });
+
+  const txt = qs('#search').value.toLowerCase();
+  const sel = qs('#filterStage').value;
   crm.clients
-    .filter(c => (!sel || c.stage === sel) && 
-      (c.name.toLowerCase().includes(txt) || c.email.includes(txt)))
-    .forEach(c => createCard(c));
+    .filter(c => (!sel || c.stage === sel) &&
+                 (c.name.toLowerCase().includes(txt) || c.email.includes(txt)))
+    .forEach(createCard);
 
   initDrag();
   updateChart();
@@ -57,8 +62,7 @@ function createCard(c) {
     <div class="badges">
       ${c.tags.map(t => `<span class="badge">${t}</span>`).join('')}
       <span class="badge ${c.stage === 'Closed' ? 'closed' : ''}">${c.stage}</span>
-    </div>
-  `;
+    </div>`;
   qs(`.cards[data-stage="${c.stage}"]`).appendChild(card);
 }
 
@@ -80,21 +84,14 @@ function initDrag() {
 }
 
 let editId = null;
-
-// Show modal on add click
 qs('#btn-add').onclick = () => {
   editId = null;
   qs('#modal-title').textContent = 'New Client';
   qs('#client-form').reset();
   qs('#modal').classList.remove('hidden');
 };
+qs('#btn-cancel').onclick = () => qs('#modal').classList.add('hidden');
 
-// Hide modal on cancel
-qs('#btn-cancel').onclick = () => {
-  qs('#modal').classList.add('hidden');
-};
-
-// Form submission
 qs('#client-form').onsubmit = e => {
   e.preventDefault();
   const c = {
@@ -111,25 +108,22 @@ qs('#client-form').onsubmit = e => {
   render();
 };
 
-// Search and filter
 qs('#search').oninput = render;
 qs('#filterStage').onchange = render;
 
-// CSV export/import
 function toCSV(arr) {
   const hdr = ['id','name','email','phone','tags','stage','notes'];
   const rows = arr.map(c => hdr.map(k =>
     `"${(k === 'tags' ? c.tags.join(';') : c[k] || '').replace(/"/g,'""')}"`
   ).join(','));
-  return [hdr.join(','), ...rows].join('\n'); // <-- Fixed here
+  return [hdr.join(','), ...rows].join('\n');
 }
+
 qs('#btn-export').onclick = () => {
   const blob = new Blob([toCSV(crm.clients)], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'clients.csv';
-  a.click();
+  a.href = url; a.download = 'clients.csv'; a.click();
 };
 qs('#btn-import').onclick = () => qs('#importFile').click();
 qs('#importFile').onchange = e => {
@@ -137,14 +131,14 @@ qs('#importFile').onchange = e => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    const [hdr, ...rows] = reader.result.trim().split('\n'); // Fixed line break
+    const [hdr, ...rows] = reader.result.trim().split('\n');
     const keys = hdr.split(',');
     rows.forEach(r => {
-      if (!r.trim()) return; // Skip empty lines
-      const vals = r.match(/(".*?"|[^,]+)/g)?.map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"')) || [];
+      const vals = r.match(/(".*?"|[^,]+)/g)
+                    .map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"'));
       const obj = {};
-      keys.forEach((k,i) => obj[k] = vals[i] ?? '');
-      obj.tags = obj.tags ? obj.tags.split(';').map(s => s.trim()).filter(Boolean) : [];
+      keys.forEach((k,i) => obj[k] = vals[i]);
+      obj.tags = obj.tags.split(';').map(s => s.trim()).filter(Boolean);
       crm.add(obj);
     });
     render();
@@ -152,15 +146,11 @@ qs('#importFile').onchange = e => {
   reader.readAsText(file);
 };
 
-// Theme toggle
 qs('#toggle-theme').onclick = () => crm.toggleTheme();
 
-// Chart.js pipeline summary
 let chart;
 function updateChart() {
-  const canvas = qs('#pipelineChart');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = qs('#pipelineChart').getContext('2d');
   const data = crm.STAGES.map(s => crm.clients.filter(c => c.stage === s).length);
   if (chart) {
     chart.data.datasets[0].data = data;
@@ -174,8 +164,5 @@ function updateChart() {
   }
 }
 
-// Add this at the very start of your script.js
-document.addEventListener('DOMContentLoaded', () => {
-  qs('#modal').classList.add('hidden');
-  render(); // Initialize the view
-});
+// INITIAL RENDER
+render();
