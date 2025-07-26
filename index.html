@@ -3,36 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple CRM - Dark</title>
+  <title>Advanced CRM</title>
+
+  <!-- Chart.js for pipeline summary -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>🧠 Simple CRM</h1>
-      <p>Organize your clients. Focus on relationships.</p>
+      <h1>🚀 Advanced CRM</h1>
+      <div class="controls">
+        <input type="text" id="search" placeholder="🔍 Search clients…" />
+        <select id="filterStage">
+          <option value="">All Stages</option>
+          <option>Lead</option><option>Contacted</option>
+          <option>Qualified</option><option>Proposal</option>
+          <option>Closed</option>
+        </select>
+        <button id="btn-add">➕ New Client</button>
+        <button id="btn-export">⬇️ Export CSV</button>
+        <input type="file" id="importFile" accept=".csv" hidden />
+        <button id="btn-import">⬆️ Import CSV</button>
+        <button id="toggle-theme">🌙/☀️</button>
+      </div>
     </header>
 
     <main>
-      <section class="form-section">
-        <h2>Add / Edit Client</h2>
-        <form id="customer-form">
-          <input type="text" id="name" placeholder="Full Name" required />
-          <input type="email" id="email" placeholder="Email Address" required />
-          <input type="text" id="phone" placeholder="Phone Number" required />
-          <textarea id="notes" placeholder="Notes (optional)"></textarea>
-          <button type="submit">💾 Save Client</button>
-        </form>
+      <section id="pipeline">
+        <!-- Pipeline columns injected here -->
       </section>
-
-      <section class="list-section">
-        <h2>📋 Client List</h2>
-        <ul id="customer-list"></ul>
-      </section>
+      <aside>
+        <canvas id="pipelineChart"></canvas>
+      </aside>
     </main>
 
+    <!-- Modal for add/edit -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <h2 id="modal-title">New Client</h2>
+        <form id="client-form">
+          <input type="text" id="name" placeholder="Full Name" required />
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="tel" id="phone" placeholder="Phone" required />
+          <input type="text" id="tags" placeholder="Tags (comma‑sep)" />
+          <select id="stage" required>
+            <option>Lead</option><option>Contacted</option>
+            <option>Qualified</option><option>Proposal</option>
+            <option>Closed</option>
+          </select>
+          <textarea id="notes" placeholder="Notes"></textarea>
+          <div class="modal-buttons">
+            <button type="submit">Save</button>
+            <button type="button" id="btn-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <footer>
-      <p>&copy; 2025 Simple CRM. All rights reserved.</p>
+      <small>&copy; 2025 Advanced CRM</small>
     </footer>
   </div>
 

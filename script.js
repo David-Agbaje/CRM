@@ -1,66 +1,201 @@
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
-
-function saveCustomers() {
-  localStorage.setItem("customers", JSON.stringify(customers));
+// --- Data & Persistence ---
+class Client {
+  constructor({id, name, email, phone, tags, stage, notes, created}) {
+    this.id = id || Date.now();
+    this.name=name; this.email=email; this.phone=phone;
+    this.tags=tags||[]; this.stage=stage; this.notes=notes;
+    this.created=created||new Date().toISOString();
+  }
 }
 
-function renderCustomers() {
-  const list = document.getElementById("customer-list");
-  list.innerHTML = "";
+class CRM {
+  constructor() {
+    this.clients = JSON.parse(localStorage.getItem('crm'))?.map(o=>new Client(o))||[];
+    window.addEventListener('storage', ()=> this.load().render());
+  }
+  save() {
+    localStorage.setItem('crm', JSON.stringify(this.clients));
+  }
+  load() {
+    this.clients = JSON.parse(localStorage.getItem('crm'))?.map(o=>new Client(o))||[];
+    return this;
+  }
+  add(c) { this.clients.push(new Client(c)); this.save(); }
+  update(c) {
+    this.clients = this.clients.map(x=>x.id===c.id?new Client(c):x);
+    this.save();
+  }
+  delete(id) {
+    this.clients = this.clients.filter(x=>x.id!==id);
+    this.save();
+  }
+}
 
-  customers.forEach((customer, index) => {
-    const li = document.createElement("li");
-    li.className = "customer";
-    li.innerHTML = `
-      <strong>${customer.name}</strong>
-      <div class="meta">📧 ${customer.email}</div>
-      <div class="meta">📞 ${customer.phone}</div>
-      <div class="meta">📝 ${customer.notes || "No notes"}</div>
-      <div class="buttons">
-        <button class="edit-btn" onclick="editCustomer(${index})">Edit</button>
-        <button class="delete-btn" onclick="deleteCustomer(${index})">Delete</button>
-      </div>
-    `;
-    list.appendChild(li);
+const STAGES = ['Lead','Contacted','Qualified','Proposal','Closed'];
+const crm = new CRM();
+
+// --- UI Rendering ---
+function renderPipeline(filter='') {
+  const container = document.getElementById('pipeline');
+  container.innerHTML = '';
+  STAGES.forEach(stage=>{
+    const col = document.createElement('div');
+    col.className='column';
+    col.dataset.stage=stage;
+    col.innerHTML=`<h3>${stage}</h3>`;
+    container.appendChild(col);
+  });
+
+  crm.clients
+    .filter(c=> {
+      const txt=document.getElementById('search').value.toLowerCase();
+      const sel=document.getElementById('filterStage').value;
+      return (!sel||c.stage===sel) &&
+             (c.name.toLowerCase().includes(txt)||c.email.includes(txt));
+    })
+    .sort((a,b)=> new Date(b.created)-new Date(a.created))
+    .forEach(renderCard);
+
+  initDragDrop();
+  updateChart();
+}
+
+function renderCard(c) {
+  const col = document.querySelector(`.column[data-stage="${c.stage}"]`);
+  const card = document.createElement('div');
+  card.className='card';
+  card.draggable=true;
+  card.dataset.id=c.id;
+  card.innerHTML=`
+    <strong>${c.name}</strong>
+    <div class="meta">📧 ${c.email} | 📞 ${c.phone}</div>
+    <div class="badges">
+      ${c.tags.map(t=>`<span class="badge">${t.trim()}</span>`).join('')}
+      <span class="badge ${c.stage==='Closed'?'closed':''}">${c.stage}</span>
+    </div>`;
+  col.appendChild(card);
+}
+
+// --- Drag & Drop ---
+function initDragDrop(){
+  let dragged;
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('dragstart', e=> {
+      dragged=card; card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', e=>{
+      card.classList.remove('dragging');
+    });
+  });
+  document.querySelectorAll('.column').forEach(col=>{
+    col.addEventListener('dragover', e=> {
+      e.preventDefault();
+      col.classList.add('over');
+    });
+    col.addEventListener('dragleave', ()=> col.classList.remove('over'));
+    col.addEventListener('drop', e=>{
+      col.classList.remove('over');
+      const id=+dragged.dataset.id;
+      const client=crm.clients.find(c=>c.id===id);
+      client.stage=col.dataset.stage;
+      crm.update(client);
+      renderPipeline();
+    });
   });
 }
 
-function addCustomer(customer) {
-  customers.push(customer);
-  saveCustomers();
-  renderCustomers();
-}
+// --- Modal Form ---
+const modal = document.getElementById('modal');
+const form = document.getElementById('client-form');
+let editId = null;
 
-function deleteCustomer(index) {
-  if (confirm("Are you sure you want to delete this customer?")) {
-    customers.splice(index, 1);
-    saveCustomers();
-    renderCustomers();
-  }
-}
+document.getElementById('btn-add').onclick = ()=>{
+  editId=null;
+  form.reset();
+  document.getElementById('modal-title').textContent='New Client';
+  modal.classList.remove('hidden');
+};
+document.getElementById('btn-cancel').onclick = ()=> modal.classList.add('hidden');
 
-function editCustomer(index) {
-  const customer = customers[index];
-  document.getElementById("name").value = customer.name;
-  document.getElementById("email").value = customer.email;
-  document.getElementById("phone").value = customer.phone;
-  document.getElementById("notes").value = customer.notes;
-  customers.splice(index, 1);
-  saveCustomers();
-  renderCustomers();
-}
-
-document.getElementById("customer-form").addEventListener("submit", function (e) {
+form.onsubmit = e=> {
   e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const notes = document.getElementById("notes").value.trim();
+  const data = {
+    id: editId,
+    name: form.name.value,
+    email: form.email.value,
+    phone: form.phone.value,
+    tags: form.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
+    stage: form.stage.value,
+    notes: form.notes.value
+  };
+  if (editId) crm.update(data);
+  else crm.add(data);
+  modal.classList.add('hidden');
+  renderPipeline();
+};
 
-  if (name && email && phone) {
-    addCustomer({ name, email, phone, notes });
-    this.reset();
+// --- Search & Filter ---
+document.getElementById('search').oninput =
+document.getElementById('filterStage').onchange = ()=> renderPipeline();
+
+// --- CSV Export/Import ---
+function toCSV(arr){
+  const hdr=['id','name','email','phone','tags','stage','notes','created'];
+  const rows = arr.map(c=>hdr.map(k=>JSON.stringify(c[k]||'')).join(','));
+  return [hdr.join(','),...rows].join('\n');
+}
+document.getElementById('btn-export').onclick = ()=>{
+  const blob = new Blob([toCSV(crm.clients)], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='clients.csv'; a.click();
+};
+document.getElementById('btn-import').onclick = ()=>{
+  document.getElementById('importFile').click();
+};
+document.getElementById('importFile').onchange = e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=> {
+    const [hdr,...rows] = reader.result.split('\n').filter(Boolean);
+    const keys = hdr.split(',');
+    rows.forEach(r=>{
+      const vals = r.match(/(".*?"|[^,]+)/g).map(s=>JSON.parse(s));
+      const obj = Object.fromEntries(keys.map((k,i)=>[k, vals[i]]));
+      obj.tags = obj.tags.split(',').map(s=>s.trim());
+      crm.add(obj);
+    });
+    renderPipeline();
+  };
+  reader.readAsText(file);
+};
+
+// --- Theme Toggle ---
+const root = document.documentElement;
+document.getElementById('toggle-theme').onclick = ()=>{
+  const t = root.getAttribute('data-theme')==='light'? 'dark':'light';
+  root.setAttribute('data-theme', t);
+};
+
+// --- Chart Showing Pipeline Counts ---
+let chart;
+function updateChart() {
+  const ctx = document.getElementById('pipelineChart').getContext('2d');
+  const counts = STAGES.map(s=> crm.clients.filter(c=>c.stage===s).length );
+  if (chart) chart.data.datasets[0].data = counts, chart.update();
+  else {
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: STAGES,
+        datasets: [{ label:'Clients', data:counts }]
+      },
+      options: { responsive:true, legend:{display:false} }
+    });
   }
-});
+}
 
-renderCustomers();
+// --- Init ---
+renderPipeline();
+root.setAttribute('data-theme','dark');
