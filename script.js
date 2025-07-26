@@ -127,8 +127,7 @@ function toCSV(arr) {
   const rows = arr.map(c => hdr.map(k =>
     `"${(k === 'tags' ? c.tags.join(';') : c[k] || '').replace(/"/g,'""')}"`
   ).join(','));
-  return [hdr.join(','), ...rows].join('
-');
+  return [hdr.join(','), ...rows].join('\n'); // <-- Fixed here
 }
 qs('#btn-export').onclick = () => {
   const blob = new Blob([toCSV(crm.clients)], {type:'text/csv'});
@@ -144,14 +143,14 @@ qs('#importFile').onchange = e => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    const [hdr, ...rows] = reader.result.trim().split('
-');
+    const [hdr, ...rows] = reader.result.trim().split('\n'); // Fixed line break
     const keys = hdr.split(',');
     rows.forEach(r => {
-      const vals = r.match(/(".*?"|[^,]+)/g).map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"'));
+      if (!r.trim()) return; // Skip empty lines
+      const vals = r.match(/(".*?"|[^,]+)/g)?.map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"')) || [];
       const obj = {};
-      keys.forEach((k,i) => obj[k] = vals[i]);
-      obj.tags = obj.tags.split(';').map(s => s.trim()).filter(Boolean);
+      keys.forEach((k,i) => obj[k] = vals[i] ?? '');
+      obj.tags = obj.tags ? obj.tags.split(';').map(s => s.trim()).filter(Boolean) : [];
       crm.add(obj);
     });
     render();
