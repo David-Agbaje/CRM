@@ -31,21 +31,15 @@ const qs = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 
 function render() {
-  // Build pipeline columns
-  const pipeline = qs('#pipeline');
-  pipeline.innerHTML = '';
-  crm.STAGES.forEach(stage => {
-    const col = document.createElement('div');
-    col.className = 'column';
-    col.innerHTML = `<h3>${stage}</h3><div class="cards" data-stage="${stage}"></div>`;
-    pipeline.appendChild(col);
-  });
-
-  // Filter and search
-  const txt = qs('#search').value.toLowerCase();
-  const sel = qs('#filterStage').value;
+  // Clear existing cards first
+  qa('.cards').forEach(zone => zone.innerHTML = '');
+  
+  const txt = qs('#search')?.value?.toLowerCase() || '';
+  const sel = qs('#filterStage')?.value || '';
+  
   crm.clients
-    .filter(c => (!sel || c.stage === sel) && (c.name.toLowerCase().includes(txt) || c.email.includes(txt)))
+    .filter(c => (!sel || c.stage === sel) && 
+      (c.name.toLowerCase().includes(txt) || c.email.includes(txt)))
     .forEach(c => createCard(c));
 
   initDrag();
@@ -180,5 +174,8 @@ function updateChart() {
   }
 }
 
-// Initialize
-render();
+// Add this at the very start of your script.js
+document.addEventListener('DOMContentLoaded', () => {
+  qs('#modal').classList.add('hidden');
+  render(); // Initialize the view
+});
