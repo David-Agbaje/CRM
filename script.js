@@ -164,7 +164,9 @@ qs('#toggle-theme').onclick = () => crm.toggleTheme();
 // Chart.js pipeline summary
 let chart;
 function updateChart() {
-  const ctx = qs('#pipelineChart').getContext('2d');
+  const canvas = qs('#pipelineChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
   const data = crm.STAGES.map(s => crm.clients.filter(c => c.stage === s).length);
   if (chart) {
     chart.data.datasets[0].data = data;
