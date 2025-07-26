@@ -1,0 +1,150 @@
+:root {
+  --primary: #4b7bec;
+  --secondary: #f1f2f6;
+  --dark: #2f3542;
+  --light: #ffffff;
+  --border: #ced6e0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--secondary);
+  color: var(--dark);
+  line-height: 1.5;
+  padding: 20px;
+}
+
+.app {
+  max-width: 900px;
+  margin: auto;
+  background: var(--light);
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease-in;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+header p {
+  color: #57606f;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+section h2 {
+  margin-bottom: 10px;
+  color: var(--dark);
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+form button {
+  padding: 10px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+form button:hover {
+  background: #3867d6;
+}
+
+#customer-list {
+  list-style: none;
+  padding: 0;
+}
+
+.customer {
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  transition: transform 0.2s ease;
+}
+
+.customer:hover {
+  transform: scale(1.02);
+}
+
+.customer strong {
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.customer button {
+  background: #ff4757;
+  border: none;
+  padding: 6px 10px;
+  margin-top: 8px;
+  margin-right: 5px;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.customer button:hover {
+  background: #e84118;
+}
+
+.customer button:nth-child(5) {
+  background: #ffa502;
+}
+
+.customer button:nth-child(5):hover {
+  background: #e0a800;
+}
+
+footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

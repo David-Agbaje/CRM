@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple CRM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🧩 Simple CRM</h1>
+      <p>Manage your customers easily and efficiently</p>
+    </header>
+
+    <main>
+      <section class="form-section">
+        <h2>Add / Edit Customer</h2>
+        <form id="customer-form">
+          <input type="text" id="name" placeholder="Full Name" required />
+          <input type="email" id="email" placeholder="Email Address" required />
+          <input type="text" id="phone" placeholder="Phone Number" required />
+          <textarea id="notes" placeholder="Customer Notes"></textarea>
+          <button type="submit">Save Customer</button>
+        </form>
+      </section>
+
+      <section class="list-section">
+        <h2>Customer List</h2>
+        <ul id="customer-list"></ul>
+      </section>
+    </main>
+
+    <footer>
+      <small>Simple CRM &copy; 2025</small>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
