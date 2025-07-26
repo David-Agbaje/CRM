@@ -1,7 +1,9 @@
 class CRM {
   constructor() {
     this.STAGES = ['Lead','Contacted','Qualified','Proposal','Closed'];
-    this.clients = JSON.parse(localStorage.getItem('crm')) || [];
+    // Start completely fresh if not already set:
+    if (!localStorage.getItem('crm')) localStorage.setItem('crm', JSON.stringify([]));
+    this.clients = JSON.parse(localStorage.getItem('crm'));
     this.loadTheme();
     window.addEventListener('storage', () => this.load().render());
   }
@@ -31,8 +33,8 @@ const qs = s => document.querySelector(s);
 const qa = s => Array.from(document.querySelectorAll(s));
 
 function render() {
-  const pipeline = qs('#pipeline');
-  pipeline.innerHTML = '';
+  // Build columns
+  const pipeline = qs('#pipeline'); pipeline.innerHTML = '';
   crm.STAGES.forEach(stage => {
     const col = document.createElement('div');
     col.className = 'column';
@@ -45,32 +47,30 @@ function render() {
   crm.clients
     .filter(c => (!sel || c.stage === sel) &&
                  (c.name.toLowerCase().includes(txt) || c.email.includes(txt)))
-    .forEach(createCard);
+    .forEach(c => createCard(c));
 
   initDrag();
   updateChart();
 }
 
+// Create a card element
 function createCard(c) {
   const card = document.createElement('div');
-  card.className = 'card';
-  card.draggable = true;
-  card.dataset.id = c.id;
+  card.className = 'card'; card.draggable = true; card.dataset.id = c.id;
   card.innerHTML = `
     <strong>${c.name}</strong>
     <div class="meta">📧 ${c.email} | 📞 ${c.phone}</div>
     <div class="badges">
       ${c.tags.map(t => `<span class="badge">${t}</span>`).join('')}
-      <span class="badge ${c.stage === 'Closed' ? 'closed' : ''}">${c.stage}</span>
+      <span class="badge ${c.stage==='Closed'?'closed':''}">${c.stage}</span>
     </div>`;
   qs(`.cards[data-stage="${c.stage}"]`).appendChild(card);
 }
 
+// Drag & drop between stages
 function initDrag() {
   let dragged;
-  qa('.card').forEach(card => {
-    card.ondragstart = () => { dragged = card; };
-  });
+  qa('.card').forEach(card => card.ondragstart = () => dragged = card);
   qa('.cards').forEach(zone => {
     zone.ondragover = e => e.preventDefault();
     zone.ondrop = () => {
@@ -84,14 +84,25 @@ function initDrag() {
 }
 
 let editId = null;
+
+// Add Client button
 qs('#btn-add').onclick = () => {
   editId = null;
   qs('#modal-title').textContent = 'New Client';
   qs('#client-form').reset();
   qs('#modal').classList.remove('hidden');
 };
+// Cancel button
 qs('#btn-cancel').onclick = () => qs('#modal').classList.add('hidden');
+// Reset CRM button
+qs('#btn-reset').onclick = () => {
+  if (confirm('Clear all clients and start fresh?')) {
+    localStorage.setItem('crm', JSON.stringify([]));
+    crm.load(); render();
+  }
+};
 
+// Form submit
 qs('#client-form').onsubmit = e => {
   e.preventDefault();
   const c = {
@@ -99,7 +110,7 @@ qs('#client-form').onsubmit = e => {
     name: qs('#name').value.trim(),
     email: qs('#email').value.trim(),
     phone: qs('#phone').value.trim(),
-    tags: qs('#tags').value.split(',').map(s => s.trim()).filter(Boolean),
+    tags: qs('#tags').value.split(',').map(s=>s.trim()).filter(Boolean),
     stage: qs('#stage').value,
     notes: qs('#notes').value.trim()
   };
@@ -108,37 +119,35 @@ qs('#client-form').onsubmit = e => {
   render();
 };
 
+// Search & filter live
 qs('#search').oninput = render;
 qs('#filterStage').onchange = render;
 
+// CSV export/import helpers
 function toCSV(arr) {
   const hdr = ['id','name','email','phone','tags','stage','notes'];
   const rows = arr.map(c => hdr.map(k =>
-    `"${(k === 'tags' ? c.tags.join(';') : c[k] || '').replace(/"/g,'""')}"`
+    `"${(k==='tags'?c.tags.join(';'):c[k]||'').replace(/"/g,'""')}"`
   ).join(','));
   return [hdr.join(','), ...rows].join('\n');
 }
-
 qs('#btn-export').onclick = () => {
   const blob = new Blob([toCSV(crm.clients)], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'clients.csv'; a.click();
+  const a = document.createElement('a'); a.href = url; a.download='clients.csv'; a.click();
 };
 qs('#btn-import').onclick = () => qs('#importFile').click();
 qs('#importFile').onchange = e => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = () => {
-    const [hdr, ...rows] = reader.result.trim().split('\n');
+    const [hdr,...rows] = reader.result.trim().split('\n');
     const keys = hdr.split(',');
     rows.forEach(r => {
       const vals = r.match(/(".*?"|[^,]+)/g)
-                    .map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"'));
-      const obj = {};
-      keys.forEach((k,i) => obj[k] = vals[i]);
-      obj.tags = obj.tags.split(';').map(s => s.trim()).filter(Boolean);
+                    .map(s=>s.replace(/^"|"$/g,'').replace(/""/g,'"'));
+      const obj = {}; keys.forEach((k,i)=>obj[k]=vals[i]);
+      obj.tags = obj.tags.split(';').map(s=>s.trim()).filter(Boolean);
       crm.add(obj);
     });
     render();
@@ -146,15 +155,16 @@ qs('#importFile').onchange = e => {
   reader.readAsText(file);
 };
 
+// Theme toggle
 qs('#toggle-theme').onclick = () => crm.toggleTheme();
 
+// Chart.js summary
 let chart;
 function updateChart() {
   const ctx = qs('#pipelineChart').getContext('2d');
-  const data = crm.STAGES.map(s => crm.clients.filter(c => c.stage === s).length);
+  const data = crm.STAGES.map(s => crm.clients.filter(c=>c.stage===s).length);
   if (chart) {
-    chart.data.datasets[0].data = data;
-    chart.update();
+    chart.data.datasets[0].data = data; chart.update();
   } else {
     chart = new Chart(ctx, {
       type: 'pie',
@@ -164,5 +174,5 @@ function updateChart() {
   }
 }
 
-// INITIAL RENDER
+// Initial render
 render();

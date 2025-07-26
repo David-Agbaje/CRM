@@ -1,3 +1,4 @@
+/* Dark theme by default */
 :root {
   --bg: #1e1e2f;
   --bg-alt: #2a2a40;
@@ -10,6 +11,7 @@
   --radius: 6px;
   --transition: 0.2s ease;
 }
+/* Light variant */
 [data-theme="light"] {
   --bg: #f4f4f8;
   --bg-alt: #fff;
@@ -29,7 +31,9 @@ body {
 }
 .hidden { display: none; }
 button, input, select, textarea { outline: none; }
-button:focus, input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); }
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--accent);
+}
 button { cursor: pointer; }
 
 /* Layout */
@@ -74,9 +78,7 @@ button { cursor: pointer; }
 .topbar-actions button { margin-left:8px; }
 
 /* Content */
-.content {
-  flex:1; display:flex; overflow:hidden;
-}
+.content { flex:1; display:flex; overflow:hidden; }
 .toolbar {
   padding:20px; background: var(--bg-alt);
   display:flex; align-items:center; gap:12px;
@@ -162,12 +164,10 @@ button { cursor: pointer; }
 .form-group textarea,
 .form-group select {
   width:100%; padding:8px; border:1px solid var(--border);
-  border-radius:var(--radius); transition:border var(--transition);
+  border-radius:var(--radius); transition: border var(--transition);
   background:var(--surface); color:var(--text);
 }
-.modal-buttons {
-  display:flex; justify-content:flex-end; gap:8px;
-}
+.modal-buttons { display:flex; justify-content:flex-end; gap:8px; }
 .modal-buttons button { padding:8px 16px; }
 
 /* Responsive */
