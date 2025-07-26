@@ -2,71 +2,109 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Advanced CRM</title>
-
-  <!-- Chart.js for pipeline summary -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Advanced CRM UI</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>🚀 Advanced CRM</h1>
-      <div class="controls">
-        <input type="text" id="search" placeholder="🔍 Search clients…" />
-        <select id="filterStage">
-          <option value="">All Stages</option>
-          <option>Lead</option><option>Contacted</option>
-          <option>Qualified</option><option>Proposal</option>
-          <option>Closed</option>
-        </select>
-        <button id="btn-add">➕ New Client</button>
-        <button id="btn-export">⬇️ Export CSV</button>
-        <input type="file" id="importFile" accept=".csv" hidden />
-        <button id="btn-import">⬆️ Import CSV</button>
-        <button id="toggle-theme">🌙/☀️</button>
-      </div>
-    </header>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="logo" tabindex="0">🌟 CRM Pro</div>
+      <ul>
+        <li class="active" tabindex="0">Dashboard</li>
+        <li tabindex="0">Contacts</li>
+        <li tabindex="0">Pipeline</li>
+        <li tabindex="0">Reports</li>
+        <li tabindex="0">Settings</li>
+      </ul>
+    </nav>
 
-    <main>
-      <section id="pipeline">
-        <!-- Pipeline columns injected here -->
-      </section>
-      <aside>
-        <canvas id="pipelineChart"></canvas>
-      </aside>
-    </main>
+    <!-- MAIN AREA -->
+    <div class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="search-wrap">
+          <input type="text" id="search" placeholder="Search clients…" aria-label="Search clients" />
+        </div>
+        <div class="topbar-actions">
+          <button id="btn-export" class="btn-outline">Export CSV</button>
+          <button id="btn-import" class="btn-outline">Import CSV</button>
+          <input type="file" id="importFile" accept=".csv" hidden aria-hidden="true" />
+          <button id="toggle-theme" class="btn-icon" aria-label="Toggle theme">🌙</button>
+        </div>
+      </header>
 
-    <!-- Modal for add/edit -->
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <h2 id="modal-title">New Client</h2>
-        <form id="client-form">
-          <input type="text" id="name" placeholder="Full Name" required />
-          <input type="email" id="email" placeholder="Email" required />
-          <input type="tel" id="phone" placeholder="Phone" required />
-          <input type="text" id="tags" placeholder="Tags (comma‑sep)" />
-          <select id="stage" required>
-            <option>Lead</option><option>Contacted</option>
-            <option>Qualified</option><option>Proposal</option>
+      <!-- CONTENT -->
+      <section class="content">
+        <div class="toolbar">
+          <button id="btn-add" class="btn-primary">+ New Client</button>
+          <select id="filterStage" class="select" aria-label="Filter by stage">
+            <option value="">All Stages</option>
+            <option>Lead</option>
+            <option>Contacted</option>
+            <option>Qualified</option>
+            <option>Proposal</option>
             <option>Closed</option>
           </select>
-          <textarea id="notes" placeholder="Notes"></textarea>
-          <div class="modal-buttons">
-            <button type="submit">Save</button>
-            <button type="button" id="btn-cancel">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </div>
 
-    <footer>
-      <small>&copy; 2025 Advanced CRM</small>
-    </footer>
+        <div id="pipeline" class="pipeline" aria-label="Client pipeline">
+          <!-- columns injected here -->
+        </div>
+
+        <aside class="chart-container">
+          <canvas id="pipelineChart" aria-label="Pipeline summary chart"></canvas>
+        </aside>
+      </section>
+    </div>
   </div>
 
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <h2 id="modal-title">New Client</h2>
+      <form id="client-form">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" required />
+        </div>
+        <div class="form-group">
+          <label for="tags">Tags (comma-separated)</label>
+          <input type="text" id="tags" />
+        </div>
+        <div class="form-group">
+          <label for="stage">Stage</label>
+          <select id="stage" required>
+            <option>Lead</option>
+            <option>Contacted</option>
+            <option>Qualified</option>
+            <option>Proposal</option>
+            <option>Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="3"></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button type="submit" class="btn-primary">Save</button>
+          <button type="button" id="btn-cancel" class="btn-outline">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
